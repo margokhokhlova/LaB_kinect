@@ -43,7 +43,8 @@ imshow(filtered_depth, []);
 % Knowing the intrinsic parameters of a camera, we can always find real
 % scene coordinates (X,Y,Z) using a depth image. 
 % Here the calibration is performed beforehand, and the values of F_x, cx,
-% cy are
+% cy are given.
+% now we can make a projectin to obtain a point cloud 
 % Please read more on camera calibration if you are interested
 % Tsai, R. (1987). A versatile camera calibration technique for high-accuracy 
 % 3D machine vision metrology using off-the-shelf TV cameras and lenses. 
@@ -104,14 +105,15 @@ mask = imread('004378_mask.png');
 % store the resulting depth map in USER_1
 
 %% PART 2. Skeletons (joints)
+% As you have seen, the kinect also gives us skeleton joints data of a
+% user. Now we are going to explore what can be done with these joints
 
-%% working with skeletons
 % load data
 % open the txt file with joints data and check how the data are organized
 % there are 25 joints estimated by the kinect v2, each joint has 3
 % Coordinates X, Y, Z, 4 coordinates for the orientation and one value
 % which corresponds to the nature of the joint estimation  (more on this
-% data here:  
+% data here: https://msdn.microsoft.com/en-us/library/microsoft.kinect.skeleton.joints.aspx) 
 Joints =[];
 M = dlmread('JointsInfo_Cyrille_v2_2.txt');
 [t,d] = size(M);
@@ -147,9 +149,9 @@ Z=bsxfun(@minus,Z,Z(:,1));
 
 %%
 % reshape joints to be able to plot the data
-% bonus task - this is not optimal to calculate, since matlab works with an
+% bonus task - the reshaping procedure below is not optimal to calculate, since matlab works with an
 % array of changing size - rewrite this procedure more optimal if you are
-% interested
+% interested.
 % measure the time it takes for my implementation and your alternative one.
 
 X1=[]; Y1=[]; Z1=[];
@@ -161,7 +163,7 @@ end
 
 XYZ=[X1', Y1', Z1'];
 
-PlotData(XYZ);
+PlotData(XYZ); % I am providing you with a function which plots the data. just look at what you see. You can also explore how the function works
 
 
 % transform data and plot
@@ -184,18 +186,22 @@ PlotData(XYZ);
 % HINT2: use the unnormilized (not processed joints)
 
 % first_frame_3d= XYZ_non_normalized(1:25,:);
+first_frame_3d= XYZ(1:25,:);
 first_frame_2d=zeros(25,2);
 cx_d = 256.265446519628880;
 cy_d = 212.411466505718410;
 fy_d = 357.304303134804570;
 fx_d = 357.530142098200430;
 % TO DO 
-
+for i=1:25
+    first_frame_2d(i,1) = round(fx_d * first_frame_3d(i,1)/first_frame_3d(i,3) + cx_d);
+    first_frame_2d(i,2) = round(fy_d * first_frame_3d(i,2)/first_frame_3d(i,3) + cy_d);
+end
 % How to check: The projected joints are already on the color image -
 % compare with the coordinates obtained 
 % PS you won't get great results, because we are not considering here the
-% FOV for the simplicity. But you should get the projections within the
-% image
+% skew factor  + our calibration data are probably not exact...
+
 figure
 imshow(I_1); %imshow color
 hold on
@@ -210,7 +216,24 @@ scatter(first_frame_2d(:,1), first_frame_2d(:,2), 'r'); % plot your 2d coordinat
 % as 30 frames per second
 % gait frequency - number of gait cycles in a time span (here let's take it
 % as 30 seconds)
-% One gait cycle is 
+% One gait cycle is 2 steps, or a repetitive part of the gait 
+
+% Please get the coordinate of right ankle from the joint data (number 19)
+% for all the frames (you have 25 joints, get the one numbered 19)
+% Joints numeration:  https://msdn.microsoft.com/en-us/library/microsoft.kinect.jointtype.aspx
+
+
+% make a 2d plot of joint position evaluation in time
 % TO DO
+figure
+subplot(3,1,1);  % plot(Ankle_right_X); title('the right ankle position evaluation: X');
+subplot(3,1,2);  % plot(Ankle_right_Y); title('the right ankle position evaluation: Y');
+subplot(3,1,3);  % plot(Ankle_right_Z); title('the right ankle position evaluation: Z');
+% what do you see? which coordinate seem to be the most approptiate to
+% evaluate the cycle? Why?
+
+% we can then evaluate this data using Min and Max...
+
+% propose your method on calculating the gait frequency based on the data
 
 
