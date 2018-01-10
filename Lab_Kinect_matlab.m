@@ -231,9 +231,51 @@ subplot(3,1,2);  % plot(Ankle_right_Y); title('the right ankle position evaluati
 subplot(3,1,3);  % plot(Ankle_right_Z); title('the right ankle position evaluation: Z');
 % what do you see? which coordinate seem to be the most approptiate to
 % evaluate the cycle? Why?
+% is it possible to find gait cycles here? 
 
-% we can then evaluate this data using Min and Max...
+% if not, check the 'lab' data below
 
+
+
+
+%%  Now we we'll get some other joints from another experiment, where the person is walking in front of the camera.
+% This data are coming from 4 synchronized kinect sensors to cover a big
+% distance 
+% there would de two types of data: data from the OptoTrack marker-based
+% tracking system and data from the Kinect
+
+datafiles = dir('*.xls');  
+nfiles = length(datafiles);    % Number of files found
 % propose your method on calculating the gait frequency based on the data
+nfiles = length(datafiles);    % Number of files found
+for ii=1:nfiles % there actually just one file
+   [ data_kinect, data_opto ] = ReadFileXLS(  datafiles(ii).name );
+end
+
+% the dimensionality is 212 x 57 => 212 frames for 19 joints x 3
+% coordinates
+% joints correspondence can be found in the XLS file.
+
+% select any of the feet joints from both of systems and plot its X, Y and
+% Z evaluation in time for both system:
+
+% hint ankle joint is a good idea: x,y, z = 13,32,51 accordingly
+% hint use two different colors, red for kinect and blue for optotrac
+
+% TO DO
 
 
+
+% now let's bring our coordinates into correspondence
+% substract from all the values the value of the spine base joint (as we
+% have done before already)
+% now we'll have our skeleton centered all the time around the same
+% coordinates
+
+% there are some missing values. Can we do something about therm? What? 
+
+% finally, with this clean data it is easier to segment gait in cycle
+% there are two ways - you can check the knee angle evaluation in time.
+% or you can simply follow one foot position and see how it changes
+% (periodically). In the second case you will need a function to estimate
+% local mins and max's on the 2d curve... (check: function findpeaks!) 
